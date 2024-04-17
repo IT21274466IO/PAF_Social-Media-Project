@@ -61,7 +61,7 @@ public class UserController {
         return "User deleted successfully with id: " + userId;
     }
 
-    @PutMapping("/users/{userId}/{userId2}")
+    @PutMapping("/users/follow/{userId1}/{userId2}")
     public User followUserHandler(@PathVariable Integer userId1, @PathVariable Integer userId2) throws Exception {
         User user = userService.followUser(userId1, userId2);
         return user;

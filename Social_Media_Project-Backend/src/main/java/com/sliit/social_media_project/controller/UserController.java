@@ -1,11 +1,11 @@
 package com.sliit.social_media_project.controller;
 
-import com.sliit.social_media_project.UserRepository.UserRepository;
+import com.sliit.social_media_project.repository.UserRepository;
 import com.sliit.social_media_project.models.User;
+import com.sliit.social_media_project.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -14,6 +14,9 @@ public class UserController {
 
     @Autowired
     UserRepository userRepository;
+
+    @Autowired
+    UserService userService;
 
     @GetMapping("/users")
     public List<User> getUser() {
@@ -24,13 +27,8 @@ public class UserController {
     @GetMapping("/users/{userId}")
     public User getUserById(@PathVariable("userId") Integer id) throws Exception {
 
-        Optional<User> user = userRepository.findById(id);
-
-        if(user.isPresent()){
-            return user.get();
-        }
-
-        throw new Exception("User not exist with userid" + id);
+        User user = userService.findUserById(id);
+        return user;
     }
 
 
@@ -38,38 +36,15 @@ public class UserController {
     @PostMapping("/createUser")
     public User createUser(@RequestBody User user) {
 
-        User newUser = new User();
-        newUser.setEmail(user.getEmail());
-        newUser.setFirstName(user.getFirstName());
-        newUser.setLastName(user.getLastName());
-        newUser.setPassword(user.getPassword());
-        newUser.setId(user.getId());
-
-        return userRepository.save(newUser);
+        User savedUser = userService.registerUser(user);
+        return savedUser;
     }
 
     @PutMapping("/updateUser/{userid}")
-    public User updateUser(@RequestBody User user, @PathVariable Integer userid) throws Exception {
+    public User updateUser(@RequestBody User user, @PathVariable Integer userId) throws Exception {
 
-        Optional<User> user1 = userRepository.findById(userid);
-
-        if(user1.isEmpty()) {
-            throw new Exception("User not exists with id: " + userid);
-        }
-
-        User oldUser = user1.get();
-
-        if(user.getFirstName() != null){
-            oldUser.setFirstName(user.getFirstName());
-        }
-        if (user.getLastName() != null){
-            oldUser.setLastName(user.getLastName());
-        }
-        if (user.getEmail() != null){
-            oldUser.setEmail(user.getEmail());
-        }
-
-        return userRepository.save(oldUser);
+        User updatedUser = userService.updateUser(user, userId);
+        return updatedUser;
     }
 
     @DeleteMapping("deleteUser/{userId}")
@@ -84,5 +59,17 @@ public class UserController {
         userRepository.delete(user.get());
 
         return "User deleted successfully with id: " + userId;
+    }
+
+    @PutMapping("/users/{userId}/{userId2}")
+    public User followUserHandler(@PathVariable Integer userId1, @PathVariable Integer userId2) throws Exception {
+        User user = userService.followUser(userId1, userId2);
+        return user;
+    }
+
+    @GetMapping("/users/search")
+    public List<User> searchUser(@RequestParam("query") String query){
+        List<User> users = userService.searchUser(query);
+        return users;
     }
 }

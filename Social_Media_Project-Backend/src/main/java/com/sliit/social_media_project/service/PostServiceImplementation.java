@@ -101,6 +101,4 @@ public class PostServiceImplementation implements PostService {
         post.getLiked().add(user);
         return postRepository.save(post);
     }
-
-    //Start from 3.55.11
 }

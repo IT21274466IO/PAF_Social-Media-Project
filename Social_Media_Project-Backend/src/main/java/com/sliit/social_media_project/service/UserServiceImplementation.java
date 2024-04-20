@@ -20,6 +20,7 @@ public class UserServiceImplementation implements UserService {
         newUser.setEmail(user.getEmail());
         newUser.setFirstName(user.getFirstName());
         newUser.setLastName(user.getLastName());
+        newUser.setGender(user.getGender());
         newUser.setPassword(user.getPassword());
         newUser.setId(user.getId());
 
@@ -62,29 +63,33 @@ public class UserServiceImplementation implements UserService {
 
     @Override
     public User updateUser(User user, Integer userId) throws Exception {
-        Optional<User> user1 = userRepository.findById(userId);
-
-        if(user1.isEmpty()) {
-            throw new Exception("User not exists with id: " + userId);
+        if (user == null) {
+            throw new IllegalArgumentException("User object cannot be null");
         }
 
-        User oldUser = user1.get();
-
-        if(user.getFirstName() != null){
-            oldUser.setFirstName(user.getFirstName());
-        }
-        if (user.getLastName() != null){
-            oldUser.setLastName(user.getLastName());
-        }
-        if (user.getEmail() != null){
-            oldUser.setEmail(user.getEmail());
-        }
-
-        return userRepository.save(oldUser);
+        return userRepository.findById(userId)
+                .map(oldUser -> {
+                    if (user.getFirstName() != null) {
+                        oldUser.setFirstName(user.getFirstName());
+                    }
+                    if (user.getLastName() != null) {
+                        oldUser.setLastName(user.getLastName());
+                    }
+                    if (user.getEmail() != null) {
+                        oldUser.setEmail(user.getEmail());
+                    }
+                    if (user.getGender() != null) {
+                        oldUser.setGender(user.getGender());
+                    }
+                    return userRepository.save(oldUser);
+                })
+                .orElseThrow(() -> new Exception("User not exists with id: " + userId));
     }
+
 
     @Override
     public List<User> searchUser(String query) {
-        return userRepository.searchUserBy(query);
+        List<User> users = userRepository.searchUserBy(query);
+        return users;
     }
 }

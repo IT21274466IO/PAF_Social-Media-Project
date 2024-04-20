@@ -4,6 +4,8 @@ import com.sliit.social_media_project.repository.UserRepository;
 import com.sliit.social_media_project.models.User;
 import com.sliit.social_media_project.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -40,7 +42,7 @@ public class UserController {
         return savedUser;
     }
 
-    @PutMapping("/updateUser/{userid}")
+    @PutMapping("/updateUser/{userId}")
     public User updateUser(@RequestBody User user, @PathVariable Integer userId) throws Exception {
 
         User updatedUser = userService.updateUser(user, userId);
@@ -68,8 +70,13 @@ public class UserController {
     }
 
     @GetMapping("/users/search")
-    public List<User> searchUser(@RequestParam("query") String query){
+    public ResponseEntity<?> searchUser(@RequestParam("query") String query){
         List<User> users = userService.searchUser(query);
-        return users;
+        // Check if the returned list is empty
+        if (users.isEmpty()) {
+            // Return an error response with appropriate status code and message
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No users found with the given name or email: " + query);
+        }
+        return ResponseEntity.ok(users);
     }
 }
